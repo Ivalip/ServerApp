@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:gravity="center"
+    android:layout_height="match_parent">
+    <EditText
+        android:id="@+id/baseUrlEditText"
+        android:hint="Введите IP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </EditText>
+    <Button
+        android:id="@+id/submitButton"
+        android:text="Задать IP"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </Button>
+    <Button
+        android:text="Выбрать изображение"
+        android:layout_gravity="center|center"
+        android:id="@+id/btnChooseImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </Button>
+    <Button
+        android:text="Отправить изображение"
+        android:layout_gravity="center"
+        android:id="@+id/btnUploadImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    </Button>
+    <Button
+        android:id="@+id/btnChooseVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выбрать видео" />
+
+    <Button
+        android:id="@+id/btnUploadVideo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Отправить видео" />
+</LinearLayout>

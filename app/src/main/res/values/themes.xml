@@ -1,0 +1,10 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.ServerApp" parent="Theme.AppCompat.DayNight">
+        <!-- Цвета -->
+        <item name="colorPrimary">@color/white</item>
+
+        <!-- Для Compose -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+    </style>
+</resources>
