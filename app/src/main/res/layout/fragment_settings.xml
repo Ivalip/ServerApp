@@ -1,14 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollViewSettings"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SettingsFragment">
+    android:padding="16dp">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Settings" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</FrameLayout>
+        <!-- Язык приложения -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Язык приложения"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Русский"
+            android:paddingBottom="16dp"
+            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceBody1" />
+
+        <!-- Максимальная длина видео -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Максимальная длина видео"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="20 сек."
+            android:paddingBottom="16dp"
+            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceBody1" />
+
+        <!-- Экспорт данных -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Экспорт данных"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Текущая история сканирования с данными и описанием"
+            android:paddingBottom="16dp"
+            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceBody1" />
+
+        <!-- Сбросить настройки -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Сбросить настройки"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Сбросить все настройки на их значения по умолчанию"
+            android:paddingBottom="16dp"
+            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceBody1" />
+
+        <!-- Сайт для отправки -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Сайт для отправки"
+            android:textSize="16sp"
+            android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+        <!-- Здесь отображаем текущий IP (или подсказку, если не задан) -->
+        <TextView
+            android:id="@+id/tvServerIp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_ip_not_set"
+            android:paddingBottom="8dp"
+            android:textSize="12sp"
+            android:textAppearance="?attr/textAppearanceBody1" />
+
+        <!-- Кнопка для вызова диалога ввода IP -->
+        <Button
+            android:id="@+id/btnConfigureIp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Изменить IP" />
+
+    </LinearLayout>
+</ScrollView>

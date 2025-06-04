@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.serverapp.fragments.ScanFragment
+import com.example.serverapp.fragments.SettingsFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {

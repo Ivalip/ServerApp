@@ -1,9 +1,7 @@
 package com.example.serverapp.fragments
 
-import android.content.ContentResolver
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -32,8 +30,7 @@ class ScanFragment : Fragment(R.layout.fragment_scan) {
         super.onViewCreated(view, savedInstanceState)
 
         // Инициализируем apiService
-        val baseUrl = "http://192.168.0.107:5000/"
-        apiService = RetrofitClient.getClient(baseUrl).create(ImageUploadService::class.java)
+        apiService = RetrofitClient.getClient().create(ImageUploadService::class.java)
 
         val btnChooseImage = view.findViewById<Button>(R.id.btnChooseImage)
         val btnChooseVideo = view.findViewById<Button>(R.id.btnChooseVideo)
