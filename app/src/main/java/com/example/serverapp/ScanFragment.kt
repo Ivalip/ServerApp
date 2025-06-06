@@ -3,10 +3,9 @@ package com.example.serverapp.fragments
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.serverapp.ImageUploadService
@@ -17,87 +16,148 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 
 class ScanFragment : Fragment(R.layout.fragment_scan) {
-    private lateinit var getImageLauncher: ActivityResultLauncher<String>
-    private lateinit var getVideoLauncher: ActivityResultLauncher<String>
+    private lateinit var takePhotoLauncher: androidx.activity.result.ActivityResultLauncher<Uri>
+    private lateinit var takeVideoLauncher: androidx.activity.result.ActivityResultLauncher<Uri>
     private lateinit var apiService: ImageUploadService
 
+    private var currentOutputUri: Uri? = null
     private var isVideo: Boolean = false
-    private var selectedUri: Uri? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Инициализируем apiService
         apiService = RetrofitClient.getClient().create(ImageUploadService::class.java)
 
-        val btnChooseImage = view.findViewById<Button>(R.id.btnChooseImage)
-        val btnChooseVideo = view.findViewById<Button>(R.id.btnChooseVideo)
-        val btnUpload      = view.findViewById<Button>(R.id.btnUpload)
+        val btnCapturePhoto = view.findViewById<ImageView>(R.id.btnChooseImage)
+        val btnCaptureVideo = view.findViewById<ImageView>(R.id.btnChooseVideo)
+        val btnUpload       = view.findViewById<ImageView>(R.id.btnUpload)
 
-        getImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                selectedUri = it
+        takePhotoLauncher = registerForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.TakePicture()
+        ) { success: Boolean ->
+            if (success && currentOutputUri != null) {
                 isVideo = false
-//                Toast.makeText( "Image selected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Фото готово", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Фото отменено", Toast.LENGTH_SHORT).show()
             }
         }
-        btnChooseImage.setOnClickListener { getImageLauncher.launch("image/*") }
-        getVideoLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
-                selectedUri = it
+        takeVideoLauncher = registerForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.CaptureVideo()
+        ) { success: Boolean ->
+            if (success && currentOutputUri != null) {
                 isVideo = true
-//                Toast.makeText(this, "Video selected", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Видео готово", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Видео отменено", Toast.LENGTH_SHORT).show()
             }
         }
-        btnChooseVideo.setOnClickListener { getVideoLauncher.launch("video/*") }
+
+        btnCapturePhoto.setOnClickListener {
+            val photoFile = createTempFile("photo_", ".jpg")
+            currentOutputUri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.provider",
+                photoFile
+            )
+            takePhotoLauncher.launch(currentOutputUri)
+        }
+        btnCaptureVideo.setOnClickListener {
+            val videoFile = createTempFile("video_", ".mp4")
+            currentOutputUri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.provider",
+                videoFile
+            )
+            takeVideoLauncher.launch(currentOutputUri)
+        }
+
         btnUpload.setOnClickListener {
-            selectedUri?.let { uri ->
+            val uri = currentOutputUri
+            if (uri != null) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     uploadMedia(uri, isVideo)
                 }
-            } ?: Toast.makeText(requireContext(), "Select a file first", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Сначала сделайте фото или видео", Toast.LENGTH_SHORT).show()
+            }
         }
+    }
+
+    private fun createTempFile(prefix: String, suffix: String): File {
+        val dir = requireContext().cacheDir
+        val file = File.createTempFile(prefix, suffix, dir)
+        return file
     }
 
     private suspend fun uploadMedia(uri: Uri, isVideo: Boolean) {
         val resolver = requireContext().contentResolver
 
-        val codeResp = apiService.getAccessCode()
-        if (!codeResp.isSuccessful || codeResp.body() == null) {
+        // 1. GET-код с сетевой защитой
+        val code: String = try {
+            val codeResp = apiService.getAccessCode()
+            if (!codeResp.isSuccessful || codeResp.body() == null) {
+                showToast("Ошибка получения кода: ${codeResp.code()}")
+                return
+            }
+            codeResp.body()!!.code
+        } catch (e: java.net.ConnectException) {
+            showToast("Сервер недоступен (не могу подключиться к ${RetrofitClient.currentBaseUrl()})")
+            return
+        } catch (e: Exception) {
+            showToast("Ошибка сети: ${e.localizedMessage}")
             return
         }
-        val code = codeResp.body()!!.code
 
         // 2. Читаем байты
-        val stream = resolver.openInputStream(uri)
-        val bytes  = stream?.readBytes()
-        stream?.close()
+        val bytes = resolver.openInputStream(uri)?.use { it.readBytes() }
         if (bytes == null) {
+            showToast("Не удалось прочитать файл")
             return
         }
 
-        // 3. Определяем MIME и имя файла
+        // 3. MIME + имя файла
         val mime = resolver.getType(uri) ?: if (isVideo) "video/mp4" else "image/jpeg"
-        val rawName = uri.lastPathSegment ?: ""
-        val filename = rawName
-            .substringAfterLast('/')
-            .substringBefore('?')
-            .ifEmpty { if (isVideo) "upload.mp4" else "upload.jpg" }
+        val filename = uri.lastPathSegment
+            ?.substringAfterLast('/')
+            ?.substringBefore('?')
+            ?: if (isVideo) "upload.mp4" else "upload.jpg"
 
-        val requestBody = bytes.toRequestBody(mime.toMediaTypeOrNull())
-        val part = MultipartBody.Part.createFormData("file", filename, requestBody)
-
-        // 4. Отправляем
-        val resp = if (isVideo) {
-            apiService.uploadVideo(code, part)
-        } else {
-            apiService.uploadImage(code, part)
-        }
-        if (!resp.isSuccessful) {
+        val part = try {
+            val requestBody = bytes.toRequestBody(mime.toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("file", filename, requestBody)
+        } catch (e: Exception) {
+            showToast("Ошибка подготовки файла: ${e.localizedMessage}")
             return
         }
 
+        // 4. POST
+        try {
+            val resp = if (isVideo) {
+                apiService.uploadVideo(code, part)
+            } else {
+                apiService.uploadImage(code, part)
+            }
+            if (!resp.isSuccessful) {
+                showToast("Ошибка загрузки: ${resp.code()}")
+                return
+            }
+        } catch (e: java.net.ConnectException) {
+            showToast("Сервер недоступен (⌛ нет соединения)")
+            return
+        } catch (e: Exception) {
+            showToast("Ошибка сети: ${e.localizedMessage}")
+            return
+        }
+        showToast("Файл отправлен, код: $code")
+    }
+
+    private fun showToast(text: String) {
+        requireActivity().runOnUiThread {
+            Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
+        }
     }
 }

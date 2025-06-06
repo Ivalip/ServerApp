@@ -10,7 +10,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.example.serverapp.R
 import com.example.serverapp.RetrofitClient
-import com.google.android.material.textview.MaterialTextView
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
