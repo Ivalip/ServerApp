@@ -9,8 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <!-- Язык приложения -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,23 +24,27 @@
             android:textSize="12sp"
             android:textAppearance="?attr/textAppearanceBody1" />
 
-        <!-- Максимальная длина видео -->
-        <TextView
+        <LinearLayout
+            android:id="@+id/setting_item"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Максимальная длина видео"
-            android:textSize="16sp"
-            android:textAppearance="?attr/textAppearanceSubtitle1" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="20 сек."
-            android:paddingBottom="16dp"
-            android:textSize="12sp"
-            android:textAppearance="?attr/textAppearanceBody1" />
-
-        <!-- Экспорт данных -->
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/item_max_length"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Максимальная длина видео"
+                android:textSize="16sp"
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
+            <TextView
+                android:id="@+id/length_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="20 сек."
+                android:paddingBottom="16dp"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceBody1" />
+        </LinearLayout>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -58,7 +60,6 @@
             android:textSize="12sp"
             android:textAppearance="?attr/textAppearanceBody1" />
 
-        <!-- Сбросить настройки -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -74,30 +75,27 @@
             android:textSize="12sp"
             android:textAppearance="?attr/textAppearanceBody1" />
 
-        <!-- Сайт для отправки -->
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Сайт для отправки"
-            android:textSize="16sp"
-            android:textAppearance="?attr/textAppearanceSubtitle1" />
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/item_server_ip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Сайт для отправки"
+                android:textSize="16sp"
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
 
-        <!-- Здесь отображаем текущий IP (или подсказку, если не задан) -->
-        <TextView
-            android:id="@+id/tvServerIp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_ip_not_set"
-            android:paddingBottom="8dp"
-            android:textSize="12sp"
-            android:textAppearance="?attr/textAppearanceBody1" />
-
-        <!-- Кнопка для вызова диалога ввода IP -->
-        <Button
-            android:id="@+id/btnConfigureIp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Изменить IP" />
-
+            <!-- Здесь отображаем текущий IP (или подсказку, если не задан) -->
+            <TextView
+                android:id="@+id/ip_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_ip_not_set"
+                android:paddingBottom="8dp"
+                android:textSize="12sp"
+                android:textAppearance="?attr/textAppearanceBody1" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -1,21 +1,23 @@
 package com.example.serverapp
 
 import okhttp3.MultipartBody
+import okhttp3.ResponseBody
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
-import retrofit2.http.Path
+import retrofit2.http.*
 
 data class CodeResponse(
     val code: String
 )
 
+// Теперь в тело ответа GET /{code} добавлены поля bags, luggages и backpacks
 data class StatusResponse(
-    val images: List<String> = emptyList(),
-    val videos: List<String> = emptyList()
+    val images: List<String>    = emptyList(),
+    val videos: List<String>    = emptyList(),
+    val bags: String            = "0",
+    val luggages: String        = "0",
+    val backpacks: String       = "0"
 )
+
 data class ImageListResponse(val images: List<String> = emptyList())
 data class VideoListResponse(val videos: List<String> = emptyList())
 
@@ -25,7 +27,7 @@ interface ImageUploadService {
     @GET("/")
     suspend fun getAccessCode(): Response<CodeResponse>
 
-    // 2. Загрузка изображения
+    // Загрузка и скачивание
     @Multipart
     @POST("/{code}/image")
     suspend fun uploadImage(
@@ -33,7 +35,6 @@ interface ImageUploadService {
         @Part file: MultipartBody.Part
     ): Response<Unit>
 
-    // 3. Загрузка видео
     @Multipart
     @POST("/{code}/video")
     suspend fun uploadVideo(
@@ -41,13 +42,15 @@ interface ImageUploadService {
         @Part file: MultipartBody.Part
     ): Response<Unit>
 
-    // 4. Получить статус (списки изображений и видео)
-    @GET("/{code}")
-    suspend fun getStatus(
-        @Path("code") code: String
-    ): Response<StatusResponse>
+    @GET("/{code}/download")
+    @Streaming
+    suspend fun downloadFile(@Path("code") code: String): Response<ResponseBody>
 
-    // 5. (опционально) отдельные GET по типу контента
+    // 4. Получить статус (списки + конкретные поля)
+    @GET("/{code}")
+    suspend fun getStatus(@Path("code") code: String): Response<StatusResponse>
+
+    // Опционально: отдельные списки
     @GET("/{code}/image")
     suspend fun getImageInfo(@Path("code") code: String): Response<ImageListResponse>
 
