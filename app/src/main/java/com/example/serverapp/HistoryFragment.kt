@@ -42,7 +42,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         requireContext().getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     }
     private val api by lazy {
-        RetrofitClient.getClient().create(ImageUploadService::class.java)
+        RetrofitClient.getClient(requireContext()).create(ImageUploadService::class.java)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -128,18 +128,14 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         if (isVideo) {
             previewImage.visibility = View.GONE
             previewVideo.visibility = View.VISIBLE
-
-            // Даём право на чтение медиасерверу
             requireContext().grantUriPermission(
                 "com.android.providers.media",
                 uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
-
             val mc = MediaController(requireContext())
             mc.setAnchorView(previewVideo)
             previewVideo.setMediaController(mc)
-
             previewVideo.setOnPreparedListener {
                 it.isLooping = false
                 previewVideo.seekTo(1)
@@ -151,7 +147,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                     Toast.LENGTH_LONG).show()
                 true
             }
-
             previewVideo.setVideoURI(uri)
             previewVideo.requestFocus()
         } else {

@@ -9,7 +9,6 @@ import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.serverapp.R
-import com.example.serverapp.RetrofitClient
 import com.google.android.material.textfield.TextInputEditText
 
 class SettingsFragment : Fragment(R.layout.fragment_settings) {
@@ -85,7 +84,6 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 val input = edit.text.toString().trim()
                 val ip = if (input.isBlank()) DEFAULT_IP else input
                 prefs.edit().putString(KEY_IP, ip).apply()
-                RetrofitClient.setServerIp(ip)
                 updateDisplayedIp()
                 dialog.dismiss()
             }

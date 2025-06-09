@@ -13,22 +13,28 @@
         android:text="Имя файла"
         android:textStyle="bold"
         android:layout_marginBottom="8dp"/>
+
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginBottom="16dp">
+        android:layout_height="300dp"
+        android:layout_marginBottom="16dp"
+        android:foregroundGravity="center"
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/preview_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
             android:scaleType="centerCrop"
+            android:layout_gravity="center"
             android:visibility="gone"/>
 
         <VideoView
             android:id="@+id/preview_video"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:visibility="gone"/>
 
     </FrameLayout>
@@ -40,12 +46,12 @@
         android:text="Получить информацию"/>
 
     <LinearLayout
+        android:id="@+id/info_block"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        android:paddingTop="16dp"
-        android:id="@+id/info_block">
+        android:paddingTop="16dp">
 
         <TextView
             android:id="@+id/upload_date"
@@ -76,6 +82,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Пакетов: —" />
-
     </LinearLayout>
 </LinearLayout>
