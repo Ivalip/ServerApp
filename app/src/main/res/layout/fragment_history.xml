@@ -64,23 +64,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Длительность: —" />
-
+        <TextView
+            android:id="@+id/handbags_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Пакетов: —" />
         <TextView
             android:id="@+id/bags_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Сумок: —" />
-
         <TextView
-            android:id="@+id/handbags_count"
+            android:id="@+id/suitcases_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ручных сумок: —" />
-
+            android:text="Чемоданов: —" />
         <TextView
-            android:id="@+id/packets_count"
+            android:id="@+id/backpacks_count"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Пакетов: —" />
+            android:text="Рюкзаков: —" />
     </LinearLayout>
 </LinearLayout>

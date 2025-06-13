@@ -9,12 +9,11 @@ data class CodeResponse(
     val code: String
 )
 
-// Теперь в тело ответа GET /{code} добавлены поля bags, luggages и backpacks
 data class StatusResponse(
-    val images: List<String>    = emptyList(),
-    val videos: List<String>    = emptyList(),
+    val status: String          = "N/A",
     val bags: String            = "0",
-    val luggages: String        = "0",
+    val handbags: String        = "0",
+    val suitcases: String       = "0",
     val backpacks: String       = "0"
 )
 
