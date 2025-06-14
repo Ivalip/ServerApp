@@ -77,11 +77,20 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    // 1) Статистика
+                    // 1) Запрашиваем статус
                     val statusResp: Response<com.example.serverapp.StatusResponse> =
                         api.getStatus(code)
+
                     if (statusResp.isSuccessful && statusResp.body() != null) {
                         val stats = statusResp.body()!!
+                        if (stats.status == "Scanning still going") {
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(requireContext(),
+                                    "Файл ещё обрабатывается на сервере",
+                                    Toast.LENGTH_SHORT).show()
+                            }
+                            return@launch
+                        }
                         withContext(Dispatchers.Main) {
                             infoBlock.visibility = View.VISIBLE
                             handbagsTv.text    = "Пакетов: ${stats.handbags}"
@@ -95,18 +104,18 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                                 "Ошибка получения статистики: ${statusResp.code()}",
                                 Toast.LENGTH_SHORT).show()
                         }
+                        return@launch
                     }
 
-                    // 2) Скачиваем файл
+                    // 2) Только после того, как статус нормальный, скачиваем файл
                     val dlResp: Response<ResponseBody> = api.downloadFile(code)
                     if (dlResp.isSuccessful && dlResp.body() != null) {
                         val body = dlResp.body()!!
                         val outFile = File(requireContext().cacheDir, filename)
                         FileOutputStream(outFile).use { it.write(body.bytes()) }
-                        prefs.edit()
-                            .putString(KEY_LAST_PATH, outFile.absolutePath)
-                            .apply()
-                        // сразу обновляем UI
+                        // Сохраняем путь
+                        prefs.edit().putString(KEY_LAST_PATH, outFile.absolutePath).apply()
+                        // И обновляем превью сразу же
                         withContext(Dispatchers.Main) {
                             showFileInView(outFile, filename)
                         }
@@ -139,32 +148,32 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
 
     private fun showFileInView(file: File, filename: String) {
         fileNameTv.text = filename
-
         val isVideo = filename.lowercase().endsWith(".mp4")
 
-        // Сброс предыдущего состояния
+        // Сбросим предыдущее состояние
         previewVideo.stopPlayback()
         previewVideo.visibility = View.GONE
         previewImage.visibility = View.GONE
 
         if (isVideo) {
-            // Видео как раньше
+            // Видео
             previewVideo.visibility = View.VISIBLE
 
-            val uri = FileProvider.getUriForFile(
+            val contentUri: Uri = FileProvider.getUriForFile(
                 requireContext(),
                 "${requireContext().packageName}.provider",
                 file
             )
+            // Разрешаем плееру читать URI
             requireContext().grantUriPermission(
                 "com.android.providers.media",
-                uri,
+                contentUri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
             )
+            // Настроим контроллер и старт
             val mc = MediaController(requireContext())
             mc.setAnchorView(previewVideo)
             previewVideo.setMediaController(mc)
-
             previewVideo.setOnPreparedListener {
                 it.isLooping = false
                 previewVideo.seekTo(1)
@@ -176,13 +185,13 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                     Toast.LENGTH_LONG).show()
                 true
             }
-
-            previewVideo.setVideoURI(uri)
+            previewVideo.setVideoURI(contentUri)
             previewVideo.requestFocus()
 
         } else {
-            // Для изображения — декодируем файл в Bitmap и ставим сразу
+            // Фото
             previewImage.visibility = View.VISIBLE
+            // Декодируем вручную, чтобы сразу получить Bitmap
             val bmp = BitmapFactory.decodeFile(file.absolutePath)
             previewImage.setImageBitmap(bmp)
         }
