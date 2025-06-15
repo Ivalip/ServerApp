@@ -2,7 +2,10 @@ package com.example.serverapp.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -141,8 +144,74 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     private fun showLocalFile() {
         val filename = prefs.getString(KEY_LAST_FILENAME, null)
         val path     = prefs.getString(KEY_LAST_PATH, null)
-        if (!filename.isNullOrBlank() && !path.isNullOrBlank()) {
-            showFileInView(File(path), filename)
+        if (filename.isNullOrBlank() || path.isNullOrBlank()) {
+            Toast.makeText(requireContext(), "Нет предыдущей отправки", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        fileNameTv.text = filename
+        val file = File(path)
+        if (!file.exists()) {
+            Toast.makeText(requireContext(), "Локальный файл не найден", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        previewVideo.stopPlayback()
+        previewVideo.visibility = View.GONE
+        previewImage.visibility = View.GONE
+
+        val isVideo = filename.lowercase().endsWith(".mp4")
+        if (isVideo) {
+            // VideoView
+            previewVideo.visibility = View.VISIBLE
+            val uri: Uri = FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.provider",
+                file
+            )
+            requireContext().grantUriPermission(
+                "com.android.providers.media",
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+            val mc = MediaController(requireContext())
+            mc.setAnchorView(previewVideo)
+            previewVideo.setMediaController(mc)
+            previewVideo.setOnPreparedListener {
+                it.isLooping = false
+                previewVideo.seekTo(1)
+                previewVideo.start()
+            }
+            previewVideo.setOnErrorListener { _, what, extra ->
+                Toast.makeText(requireContext(),
+                    "Ошибка воспроизведения (code=$what, extra=$extra)",
+                    Toast.LENGTH_LONG).show()
+                true
+            }
+            previewVideo.setVideoURI(uri)
+            previewVideo.requestFocus()
+        } else {
+            // ImageView с учётом EXIF
+            previewImage.visibility = View.VISIBLE
+            val bmp = BitmapFactory.decodeFile(file.absolutePath)
+            val exif = ExifInterface(file.absolutePath)
+            val orient = exif.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )
+            val rotation = when (orient) {
+                ExifInterface.ORIENTATION_ROTATE_90   -> 90f
+                ExifInterface.ORIENTATION_ROTATE_180  -> 180f
+                ExifInterface.ORIENTATION_ROTATE_270  -> 270f
+                else -> 0f
+            }
+            val finalBmp: Bitmap = if (rotation != 0f) {
+                val matrix = Matrix().apply { postRotate(rotation) }
+                Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+            } else {
+                bmp
+            }
+            previewImage.setImageBitmap(finalBmp)
         }
     }
 
@@ -150,7 +219,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         fileNameTv.text = filename
         val isVideo = filename.lowercase().endsWith(".mp4")
 
-        // Сбросим предыдущее состояние
         previewVideo.stopPlayback()
         previewVideo.visibility = View.GONE
         previewImage.visibility = View.GONE
