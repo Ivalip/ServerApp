@@ -21,7 +21,7 @@
         app:labelVisibilityMode="labeled"
         app:itemHorizontalTranslationEnabled="false"
 
-        app:itemIconTint="@color/design_default_color_primary"
+        app:itemIconTint="@color/white"
         app:itemTextColor="@color/design_default_color_on_primary"
         />
 </LinearLayout>
